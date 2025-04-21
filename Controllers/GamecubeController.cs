@@ -151,11 +151,50 @@ namespace Delfinovin.Controllers
                 return position;
             }
 
-            Vector2 ShapeLeftStick(Vector2 stick) {
-                stick = ClampInput(stick, new Vector2( -0.1f,  0.1f), new Vector2(-0.9f, -1.0f),  new Vector2( 0.0f, -1.0f));
-                stick = ClampInput(stick, new Vector2(-0.09f, 0.09f), new Vector2( 0.9f,  1.0f),  new Vector2( 0.0f,  1.0f));
-                stick = ClampInput(stick, new Vector2( -0.9f, -1.0f), new Vector2( 0.09f, 0.09f), new Vector2(-1.0f,  0.0f));
-                stick = ClampInput(stick, new Vector2(  0.9f,  1.0f), new Vector2(-0.09f, 0.09f), new Vector2( 1.0f,  0.0f));
+            // Our new ShapeStick that uses a for loop and math:
+            Vector2 ShapeStick(Vector2 stick, float radRange, float lenRange)
+            {
+                // Process the four directions in order: Up, Right, Down, Left.
+                // We want up to be processed first so we define the angle for up as -PI/2.
+                for (int i = 0; i < 4; i++)
+                {
+                    // Calculate the angle for each cardinal direction:
+                    // For i = 0: up (-π/2), i = 1: right (0), i = 2: down (π/2), i = 3: left (π)
+                    float angle = - (float)Math.PI / 2 + i * ((float)Math.PI / 2);
+                    
+                    // Create a unit direction vector.
+                    Vector2 d = new Vector2((float)Math.Cos(angle), (float)Math.Sin(angle));
+                    
+                    Vector2 rangeX, rangeY, output;
+                    if (Math.Abs(d.X) < 0.001f)
+                    {
+                        // Vertical direction (up or down)
+                        rangeX = new Vector2(-radRange, radRange);
+                        if (d.Y < 0) {
+                            // Up: We want to snap if Y is between -1.0 and -lenRange.
+                            rangeY = new Vector2(-1.0f, -lenRange);
+                        } else {
+                            // Down: Snap if Y is between lenRange and 1.0.
+                            rangeY = new Vector2(lenRange, 1.0f);
+                        }
+                        output = new Vector2(0, d.Y);
+                    }
+                    else
+                    {
+                        // Horizontal direction (right or left)
+                        rangeY = new Vector2(-radRange, radRange);
+                        if (d.X > 0) {
+                            // Right: Snap if X is between lenRange and 1.0.
+                            rangeX = new Vector2(lenRange, 1.0f);
+                        } else {
+                            // Left: Snap if X is between -1.0 and -lenRange.
+                            rangeX = new Vector2(-1.0f, -lenRange);
+                        }
+                        output = new Vector2(d.X, 0);
+                    }
+                    // Apply the clamp for the current direction.
+                    stick = ClampInput(stick, rangeX, rangeY, output);
+                }
                 return stick;
             }
             
@@ -229,7 +268,8 @@ namespace Delfinovin.Controllers
                     ProfileManager.CurrentProfiles[ControllerPort].RightStickDeadzone),
                     rightRange);
 
-                LeftStick = ShapeLeftStick(LeftStick);
+                LeftStick  = ShapeStick(LeftStick,  0.1f, 0.9f);
+                RightStick = ShapeStick(RightStick, 0.1f, 0.9f);
                 // Get whether or not the user wants to swap the control sticks.
                 bool swapSticks = ProfileManager.CurrentProfiles[ControllerPort].SwapControlSticks;
 
