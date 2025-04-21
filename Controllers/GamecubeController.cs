@@ -137,7 +137,11 @@ namespace Delfinovin.Controllers
         {
             int DeNormalize(float axis) { return (int)(axis * short.MaxValue); }
 
-            int ShapeTrigger(int trigger, float deadRange) { return (trigger < DeNormalize(deadRange)) ? 0 : trigger; }
+            int ShapeTrigger(int trigger, float deadRange) 
+            {
+                int threshold = (int)(255f * deadRange);
+                return (trigger < threshold) ? 0 : trigger;
+            }
             
             Vector2 ClampInput(Vector2 position, Vector2 range_in_X, Vector2 range_in_Y, Vector2 range_out)
             {
