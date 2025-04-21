@@ -136,12 +136,6 @@ namespace Delfinovin.Controllers
         public void UpdateInputs(ControllerStatus input)
         {
             int DeNormalize(float axis) { return (int)(axis * short.MaxValue); }
-
-            int ShapeTrigger(int trigger, float deadRange) 
-            {
-                int threshold = (int)(deadRange * 255f);
-                return (trigger < threshold) ? 0 : trigger;
-            }
             
             Vector2 ClampInput(Vector2 position, Vector2 range_in_X, Vector2 range_in_Y, Vector2 range_out)
             {
@@ -248,8 +242,7 @@ namespace Delfinovin.Controllers
                             sliderValue = (int)(input.Triggers.Y < sliderValue ? input.Triggers.Y : sliderValue);
                             sliderValue = ApplyTriggerThreshold(sliderValue, ProfileManager.CurrentProfiles[ControllerPort].TriggerThreshold);
                         }
-
-                        sliderValue = ShapeTrigger(sliderValue, 0.2f);
+                        
                         // Assign our trigger value.
                         _controller.SetSliderValue((Xbox360Slider)output, (byte)sliderValue);
                     }
