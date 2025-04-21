@@ -7,6 +7,7 @@ using System.Numerics;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
+using System.IO;
 using System;
 
 namespace Delfinovin.Controllers
@@ -242,7 +243,8 @@ namespace Delfinovin.Controllers
                             sliderValue = (int)(input.Triggers.Y < sliderValue ? input.Triggers.Y : sliderValue);
                             sliderValue = ApplyTriggerThreshold(sliderValue, ProfileManager.CurrentProfiles[ControllerPort].TriggerThreshold);
                         }
-                        
+
+                        File.AppendAllText("slider_log.txt", sliderValue.ToString() + Environment.NewLine);
                         // Assign our trigger value.
                         _controller.SetSliderValue((Xbox360Slider)output, (byte)sliderValue);
                     }
