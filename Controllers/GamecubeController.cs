@@ -245,7 +245,7 @@ namespace Delfinovin.Controllers
                             sliderValue = ApplyTriggerThreshold(sliderValue, ProfileManager.CurrentProfiles[ControllerPort].TriggerThreshold);
                         }
 
-                        sliderValue = ShapeTrigger(sliderValue, 0.16f)
+                        sliderValue = ShapeTrigger(sliderValue, 0.16f);
                         // Assign our trigger value.
                         _controller.SetSliderValue((Xbox360Slider)output, (byte)sliderValue);
                     }
