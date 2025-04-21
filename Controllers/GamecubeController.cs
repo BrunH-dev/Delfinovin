@@ -134,6 +134,31 @@ namespace Delfinovin.Controllers
 
         public void UpdateInputs(ControllerStatus input)
         {
+            Vector2 ClampInput(Vector2 position, Vector2 range_in_X, Vector2 range_in_Y, Vector2 range_out) {
+                int DeNormalize(float axis) { return (int)(axis * short.MaxValue); }
+
+                range_in_X.X  = DeNormalize(range_in_X.X);
+                range_in_X.Y  = DeNormalize(range_in_X.Y);
+                range_in_Y.X  = DeNormalize(range_in_Y.X);
+                range_in_Y.Y  = DeNormalize(range_in_Y.Y);
+                range_out.X   = DeNormalize(range_out.X);
+                range_out.Y   = DeNormalize(range_out.Y);
+                if ((position.X >= range_in_X.X && position.X <= range_in_X.Y) && (position.Y >= range_in_Y.X && position.Y <= range_in_Y.Y)) {
+                    position.X = range_out.X;
+                    position.Y = range_out.Y;
+                }
+
+                return position;
+            }
+
+            Vector2 ShapeLeftStick(Vector2 stick) {
+                stick = ClampInput(stick, new Vector2( -0.1f,  0.1f), new Vector2(-0.9f, -1.0f),  new Vector2( 0.0f, -1.0f));
+                stick = ClampInput(stick, new Vector2(-0.09f, 0.09f), new Vector2( 0.9f,  1.0f),  new Vector2( 0.0f,  1.0f));
+                stick = ClampInput(stick, new Vector2( -0.9f, -1.0f), new Vector2( 0.09f, 0.09f), new Vector2(-1.0f,  0.0f));
+                stick = ClampInput(stick, new Vector2(  0.9f,  1.0f), new Vector2(-0.09f, 0.09f), new Vector2( 1.0f,  0.0f));
+                return stick;
+            }
+            
             // We can update our input if:
             // - The previous input is not the same
             // - This controller is connected
@@ -204,6 +229,7 @@ namespace Delfinovin.Controllers
                     ProfileManager.CurrentProfiles[ControllerPort].RightStickDeadzone),
                     rightRange);
 
+                LeftStick = ShapeLeftStick(LeftStick);
                 // Get whether or not the user wants to swap the control sticks.
                 bool swapSticks = ProfileManager.CurrentProfiles[ControllerPort].SwapControlSticks;
 
